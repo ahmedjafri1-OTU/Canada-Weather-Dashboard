@@ -14,8 +14,6 @@ from plot_utils import (row_line_violin, row_bar_violin, row_windrose_violin)
 
 
 
-st.write("plot_utils loaded from:", plot_utils.__file__)
-st.write("has violin_fig:", hasattr(plot_utils, "violin_fig"))
 
 
 st.set_page_config(page_title="Canada Historic Weather", layout="wide")
