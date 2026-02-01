@@ -2,7 +2,8 @@
 
 import streamlit as st
 import pandas as pd
-import geopy 
+from geopy.geocoders import Nominatim
+pip install geopy
 
 from geo_utils import geocode_canada
 from map_picker import pick_location_map
