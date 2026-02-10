@@ -5,4 +5,8 @@ matplotlib
 requests
 geopy
 folium
+streamlit
+geopy
+requests
+pandas
 streamlit-folium
