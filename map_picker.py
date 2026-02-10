@@ -1,32 +1,28 @@
 # map_picker.py
+import streamlit as st
 import folium
 from streamlit_folium import st_folium
 
-def pick_location_map(
-    center_lat=56.1304,   # Canada center-ish
-    center_lon=-106.3468,
-    zoom=4
-):
+def pick_location_map(center_lat: float, center_lon: float, zoom: int, key: str):
     """
-    Returns (lat, lon) if user clicked on the map, else (None, None).
-    Uses OpenStreetMap tiles via Folium (Leaflet).
+    Shows an interactive map and returns (lat, lon) when user clicks.
+    IMPORTANT: `key` must be unique per map instance (map_a, map_b)
     """
 
-    m = folium.Map(
-        location=[center_lat, center_lon],
-        zoom_start=zoom,
-        tiles="OpenStreetMap"
+    m = folium.Map(location=[center_lat, center_lon], zoom_start=zoom)
+
+    st.caption("Tip: click on the map to select coordinates.")
+
+    out = st_folium(
+        m,
+        width=750,
+        height=450,
+        key=key,  
     )
 
-    # Optional: show lat/lon under mouse
-    folium.LatLngPopup().add_to(m)
+    lat = lon = None
+    if out and out.get("last_clicked"):
+        lat = out["last_clicked"]["lat"]
+        lon = out["last_clicked"]["lng"]
 
-    # Render and capture interactions
-    out = st_folium(m, height=520, width=None)
-
-    # When user clicks, streamlit-folium returns "last_clicked"
-    last = out.get("last_clicked")
-    if last:
-        return float(last["lat"]), float(last["lng"])
-
-    return None, None
+    return lat, lon
