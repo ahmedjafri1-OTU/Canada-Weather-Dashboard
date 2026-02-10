@@ -76,14 +76,15 @@ st.subheader("1) Date range, timezone, and variables")
 
 c1, c2, c3 = st.columns(3)
 with c1:
-    start_date = st.date_input("Start date", value=pd.to_datetime("2020-01-01").date())
+    start_date = st.date_input("Start date", value=pd.to_datetime("2020-01-01").date(), key="start_date")
 with c2:
-    end_date = st.date_input("End date", value=pd.to_datetime("2020-01-07").date())
+    end_date = st.date_input("End date", value=pd.to_datetime("2020-01-07").date(), key="end_date")
 with c3:
     timezone = st.selectbox(
         "Timezone",
         ["America/Toronto", "America/Vancouver", "America/Edmonton", "America/Winnipeg", "America/Halifax", "UTC"],
         index=0,
+        key="timezone",
     )
 
 if start_date > end_date:
@@ -114,6 +115,7 @@ hourly_variables = st.multiselect(
         "wind_direction_10m",
         "precipitation",
     ],
+    key="hourly_variables",
 )
 
 st.divider()
@@ -123,6 +125,9 @@ st.divider()
 # LOCATION PICKER UI
 # ---------------------------------------------------------
 def location_picker(prefix: str, default_search: str):
+    """
+    prefix must be "a" or "b"
+    """
     label_key = f"label_{prefix}"
     search_key = f"search_{prefix}"
     locate_btn = f"locate_{prefix}"
@@ -155,11 +160,14 @@ def location_picker(prefix: str, default_search: str):
                 st.success(f"{prefix.upper()} centered near: {geo.get('display_name','(unknown)')}")
 
     with col2:
+        # ✅ FIX: pass a UNIQUE key so A and B maps don't collide
         lat, lon = pick_location_map(
             center_lat=st.session_state[f"map_center_lat_{prefix}"],
             center_lon=st.session_state[f"map_center_lon_{prefix}"],
             zoom=st.session_state[f"map_zoom_{prefix}"],
+            key=f"map_{prefix}",  # map_a, map_b
         )
+
         if lat is not None and lon is not None:
             st.session_state[f"selected_lat_{prefix}"] = lat
             st.session_state[f"selected_lon_{prefix}"] = lon
@@ -260,27 +268,22 @@ else:
     if d is None or d.empty:
         st.warning("No data after season filter.")
     else:
-        # Temperature
         if "temperature_2m" in d.columns:
             fig = plot_utils.row_line_violin(d, "temperature_2m", "Temperature (2m)", "°C")
             st.pyplot(fig, use_container_width=True, clear_figure=True)
 
-        # RH
         if "relative_humidity_2m" in d.columns:
             fig = plot_utils.row_line_violin(d, "relative_humidity_2m", "Relative Humidity (2m)", "%")
             st.pyplot(fig, use_container_width=True, clear_figure=True)
 
-        # Rain
         if "rain" in d.columns:
             fig = plot_utils.row_line_violin(d, "rain", "Rain", "mm")
             st.pyplot(fig, use_container_width=True, clear_figure=True)
 
-        # Snow
         if "snowfall" in d.columns:
             fig = plot_utils.row_bar_violin(d, "snowfall", "Snowfall", "cm")
             st.pyplot(fig, use_container_width=True, clear_figure=True)
 
-        # Windrose
         if "wind_speed_10m" in d.columns and "wind_direction_10m" in d.columns:
             fig = plot_utils.row_windrose_violin(
                 d,
@@ -296,7 +299,7 @@ st.divider()
 
 
 # ---------------------------------------------------------
-# COMPARE A vs B ON SAME GRAPH (your requirement)
+# COMPARE A vs B ON SAME GRAPH
 # ---------------------------------------------------------
 st.subheader("5) Compare Location A vs Location B (same graph)")
 
@@ -351,7 +354,12 @@ else:
             st.pyplot(fig_wr, use_container_width=True, clear_figure=True)
     else:
         st.info("Windrose needs wind_speed_10m and wind_direction_10m for both locations.")
+
 st.divider()
+
+# ---------------------------------------------------------
+# STATS / FITTING (unchanged)
+# ---------------------------------------------------------
 st.header("Statistics / Distribution Fitting")
 
 if df_a is None or df_a.empty:
@@ -365,9 +373,6 @@ if df_a is not None and not df_a.empty:
 if df_b is not None and not df_b.empty:
     available_stats.append(st.session_state.label_b)
 
-# ---------------------------------------------------------
-# 1) WEIBULL PARAMETERS (choose dataset + season)
-# ---------------------------------------------------------
 st.subheader("Weibull parameters (wind_speed_10m)")
 
 if not available_stats:
@@ -409,9 +414,6 @@ else:
 
 st.divider()
 
-# ---------------------------------------------------------
-# 2) WIND FIT REPORT (PDF → CDF → Tail) for one dataset
-# ---------------------------------------------------------
 st.subheader("Wind fit report (PDF → CDF → Tail)")
 
 if not available_stats:
@@ -459,9 +461,6 @@ else:
 
 st.divider()
 
-# ---------------------------------------------------------
-# 3) WINTER vs SUMMER (PDF + CDF) for one dataset
-# ---------------------------------------------------------
 st.subheader("Winter vs Summer fits (PDF + CDF, ranked by peak PDF)")
 
 if not available_stats:
@@ -510,18 +509,15 @@ else:
 
 st.divider()
 
-# ---------------------------------------------------------
-# 4) A vs B COMPARE WIND SPEED PDF/CDF
-# ---------------------------------------------------------
 st.subheader("Compare Location A vs B: wind speed PDF + CDF")
 
 if df_a is None or df_a.empty or df_b is None or df_b.empty:
     st.info("Fetch BOTH locations first.")
 else:
-    season_cmp = st.selectbox("Season for PDF/CDF compare", ["All", "Winter", "Summer"], index=0, key="stats_cmp_season")
-    if season_cmp == "Winter":
+    season_cmp2 = st.selectbox("Season for PDF/CDF compare", ["All", "Winter", "Summer"], index=0, key="stats_cmp_season")
+    if season_cmp2 == "Winter":
         months_cmp = WINTER_MONTHS
-    elif season_cmp == "Summer":
+    elif season_cmp2 == "Summer":
         months_cmp = SUMMER_MONTHS
     else:
         months_cmp = None
@@ -548,4 +544,3 @@ else:
         st.warning("Not enough wind data to compare A vs B for this season.")
     else:
         st.pyplot(fig, use_container_width=True, clear_figure=True)
-
