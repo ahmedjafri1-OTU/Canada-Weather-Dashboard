@@ -4,12 +4,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from typing import Optional, List, Set, Dict, Tuple
 
-
-# ============================================================
-# CORE HELPERS
-# ============================================================
 
 def _prep_df(df: pd.DataFrame, y_cols):
     if df is None or df.empty or "time" not in df.columns:
@@ -35,9 +30,6 @@ def _clean_nonneg(series: pd.Series) -> pd.Series:
     return x
 
 
-# ============================================================
-# DASHBOARD ROWS (single location)
-# ============================================================
 
 def row_line_violin(df: pd.DataFrame, y: str, title: str, ylabel: str):
     d = _prep_df(df, [y])
@@ -153,10 +145,6 @@ def row_windrose_violin(
     return fig
 
 
-# ============================================================
-# MULTI-VARIABLE (one dataset) with multiple y-axes
-# ============================================================
-
 def multi_timeseries(
     df: pd.DataFrame,
     y_cols: List[str],
@@ -207,9 +195,7 @@ def multi_timeseries(
     return fig
 
 
-# ============================================================
-# A vs B OVERLAY LINE PLOT (same variable, same axes)
-# ============================================================
+
 
 def compare_timeseries_ab(
     df_a: pd.DataFrame,
@@ -255,9 +241,6 @@ def compare_timeseries_ab(
     return fig
 
 
-# ============================================================
-# A vs B WINDROSE (side-by-side)
-# ============================================================
 
 def compare_windrose_ab(
     df_a: pd.DataFrame,
@@ -312,9 +295,6 @@ def compare_windrose_ab(
     return fig
 
 
-# ============================================================
-# WEIBULL PARAMS (for display)
-# ============================================================
 
 def weibull_fit_params(series: pd.Series, force_loc0: bool = True):
     try:
@@ -334,9 +314,6 @@ def weibull_fit_params(series: pd.Series, force_loc0: bool = True):
     return {"shape_k": float(c), "loc": float(loc), "scale_lambda": float(scale), "n": int(x.size)}
 
 
-# ============================================================
-# 3-PANEL WIND FIT REPORT (PDF -> CDF -> Tail)
-# ============================================================
 
 def wind_fit_report_3panel(
     df: pd.DataFrame,
@@ -438,9 +415,6 @@ def wind_fit_report_3panel(
     return fig
 
 
-# ============================================================
-# WINTER vs SUMMER FITS: PDF + CDF (2x2)
-# ============================================================
 
 def seasonal_pdf_cdf_comparison(
     df: pd.DataFrame,
@@ -597,10 +571,6 @@ def seasonal_pdf_cdf_comparison(
     fig.tight_layout(pad=0.8)
     return fig
 
-
-# ============================================================
-# COMPARE TWO LOCATIONS: PDF + CDF overlay
-# ============================================================
 
 def compare_two_locations_pdf_cdf(
     df_a: pd.DataFrame,
