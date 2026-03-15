@@ -2,12 +2,8 @@
 import streamlit as st
 import pandas as pd
 
-# MUST be first Streamlit call
 st.set_page_config(page_title="Canada Weather Dashboard", layout="wide")
 
-# ---------------------------------------------------------
-# SAFE IMPORTS
-# ---------------------------------------------------------
 try:
     from geo_utils import geocode_canada
 except Exception as e:
@@ -40,9 +36,6 @@ WINTER_MONTHS = {11, 12, 1, 2, 3}
 SUMMER_MONTHS = {4, 5, 6, 7, 8, 9, 10}
 
 
-# ---------------------------------------------------------
-# SESSION STATE INIT
-# ---------------------------------------------------------
 def init_state():
     defaults = {
         "map_center_lat_a": 56.1304,
@@ -68,10 +61,6 @@ def init_state():
 
 init_state()
 
-
-# ---------------------------------------------------------
-# SHARED CONTROLS
-# ---------------------------------------------------------
 st.subheader("1) Date range, timezone, and variables")
 
 c1, c2, c3 = st.columns(3)
@@ -121,9 +110,6 @@ hourly_variables = st.multiselect(
 st.divider()
 
 
-# ---------------------------------------------------------
-# LOCATION PICKER UI
-# ---------------------------------------------------------
 def location_picker(prefix: str, default_search: str):
     """
     prefix must be "a" or "b"
@@ -160,7 +146,6 @@ def location_picker(prefix: str, default_search: str):
                 st.success(f"{prefix.upper()} centered near: {geo.get('display_name','(unknown)')}")
 
     with col2:
-        # ✅ FIX: pass a UNIQUE key so A and B maps don't collide
         lat, lon = pick_location_map(
             center_lat=st.session_state[f"map_center_lat_{prefix}"],
             center_lon=st.session_state[f"map_center_lon_{prefix}"],
@@ -212,9 +197,6 @@ def location_picker(prefix: str, default_search: str):
         st.success(f"Location {prefix.upper()} data fetched.")
 
 
-# ---------------------------------------------------------
-# LOCATION A + B
-# ---------------------------------------------------------
 st.subheader("2) Location A")
 location_picker("a", "Toronto, ON")
 st.divider()
@@ -227,9 +209,6 @@ df_a = st.session_state.weather_df_a
 df_b = st.session_state.weather_df_b
 
 
-# ---------------------------------------------------------
-# SEASON FILTER
-# ---------------------------------------------------------
 def apply_season(df: pd.DataFrame, season: str) -> pd.DataFrame:
     if df is None or df.empty:
         return df
@@ -245,9 +224,6 @@ def apply_season(df: pd.DataFrame, season: str) -> pd.DataFrame:
     return d
 
 
-# ---------------------------------------------------------
-# SINGLE-LOCATION DASHBOARD (A or B)
-# ---------------------------------------------------------
 st.subheader("4) Single-location dashboard (existing plots)")
 
 available = []
@@ -298,9 +274,6 @@ else:
 st.divider()
 
 
-# ---------------------------------------------------------
-# COMPARE A vs B ON SAME GRAPH
-# ---------------------------------------------------------
 st.subheader("5) Compare Location A vs Location B (same graph)")
 
 if df_a is None or df_a.empty or df_b is None or df_b.empty:
@@ -357,9 +330,6 @@ else:
 
 st.divider()
 
-# ---------------------------------------------------------
-# STATS / FITTING (unchanged)
-# ---------------------------------------------------------
 st.header("Statistics / Distribution Fitting")
 
 if df_a is None or df_a.empty:
